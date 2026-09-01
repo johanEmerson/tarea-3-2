@@ -1,0 +1,44 @@
+﻿version: '3.8'
+
+services:
+  pagatu-prometheus-dev:
+    image: prom/prometheus:v2.51.0
+    container_name: pagatu-prometheus-dev
+    ports:
+      - "19090:9090"
+    volumes:
+      - ./prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: always
+
+  pagatu-grafana-dev:
+    image: grafana/grafana:10.4.0
+    container_name: pagatu-grafana-dev
+    ports:
+      - "13000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: always
+
+  pagatu-loki-dev:
+    image: grafana/loki:3.0.0
+    container_name: pagatu-loki-dev
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml
+    command: -config.file=/etc/loki/loki-config.yml
+    restart: always
+
+  pagatu-promtail-dev:
+    image: grafana/promtail:3.0.0
+    container_name: pagatu-promtail-dev
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/promtail-config.yml
+    depends_on:
+      - pagatu-loki-dev
+    restart: always

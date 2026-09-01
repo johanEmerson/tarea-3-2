@@ -1,0 +1,25 @@
+﻿name: pagatu-obs-dev
+
+services:
+  pagatu-prometheus:
+    image: prom/prometheus:v3.14.0
+    container_name: pagatu-prometheus-dev
+    restart: unless-stopped
+    ports:
+      - "19090:9090"
+    volumes:
+      - ./prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  pagatu-grafana:
+    image: grafana/grafana:11.5.0
+    container_name: pagatu-grafana-dev
+    restart: unless-stopped
+    ports:
+      - "13000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
